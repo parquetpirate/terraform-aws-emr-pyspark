@@ -3,7 +3,7 @@
 
 # python_scripts
 resource "aws_s3_object" "python_scripts" {
-  for_each = fileset("${var.pipeline_directory}/", "**")
+  for_each = fileset("${var.pipeline_directory}/", "*.py")
   bucket   = var.bucket_name
   key      = "pipeline/${each.value}"
   source   = "${var.pipeline_directory}/${each.value}"
@@ -12,7 +12,7 @@ resource "aws_s3_object" "python_scripts" {
 
 # raw_data
 resource "aws_s3_object" "raw_data" {
-  for_each = fileset("${var.data_directory}/", "**")
+  for_each = fileset("${var.data_directory}/", "*.csv")
   bucket   = var.bucket_name
   key      = "data/${each.value}"
   source   = "${var.data_directory}/${each.value}"
@@ -39,7 +39,7 @@ resource "aws_s3_object" "output" {
 
 # bash_scripts
 resource "aws_s3_object" "bash_scripts" {
-  for_each = fileset("${var.scripts_directory}/", "**")
+  for_each = fileset("${var.scripts_directory}/", "*.sh")
   bucket   = var.bucket_name
   key      = "scripts/${each.value}"
   source   = "${var.scripts_directory}/${each.value}"
