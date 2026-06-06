@@ -229,13 +229,22 @@ terraform apply
 # Build the image
 docker build -t terraform-image:emr-pyspark .
 
-# Run the container with AWS credentials mounted
-docker run -it --name emr-pyspark \
+# Start the container in detached mode with the IaC folder mounted
+docker run -dit --name emr-pyspark \
   -v $(pwd)/IaC:/iac \
-  -v ~/.aws:/root/.aws \
   terraform-image:emr-pyspark /bin/bash
 
-# Inside the container
+# Access the container's shell
+docker exec -it emr-pyspark /bin/bash
+
+# Configure AWS credentials inside the container
+aws configure
+# AWS Access Key ID: <your-access-key>
+# AWS Secret Access Key: <your-secret-key>
+# Default region name: us-east-2
+# Default output format: json
+
+# Run Terraform
 cd /iac
 terraform init
 terraform apply
