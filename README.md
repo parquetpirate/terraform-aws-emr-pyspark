@@ -215,10 +215,14 @@ scripts_directory  = "./scripts"
 
 Also update the backend bucket name in `config.tf` line 18 to match your bucket.
 
-### 4. Initialize and apply
+### 4. Import the S3 bucket and apply
 
 ```bash
 terraform init
+
+# Import the bucket you created in step 2 into Terraform state
+terraform import module.s3.aws_s3_bucket.this terraform-aws-emr-pyspark-<your-aws-account-id>
+
 terraform plan
 terraform apply
 ```
@@ -247,6 +251,11 @@ aws configure
 # Run Terraform
 cd /iac
 terraform init
+
+# Import the bucket you created manually into Terraform state
+terraform import module.s3.aws_s3_bucket.this terraform-aws-emr-pyspark-<your-aws-account-id>
+
+terraform plan
 terraform apply
 ```
 
