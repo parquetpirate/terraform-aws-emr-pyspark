@@ -38,5 +38,8 @@ def write_log(text, bucket):
     # Print to stdout
     print(text)
 
-    # Upload to S3 bucket
-    bucket.upload_file(log_file, "logs/" + file_date + "-log_spark.txt")
+    # Upload to S3 bucket (non-fatal if it fails)
+    try:
+        bucket.upload_file(log_file, "logs/" + file_date + "-log_spark.txt")
+    except Exception:
+        print(f"Warning: Failed to upload log to S3 — {log_file}")
