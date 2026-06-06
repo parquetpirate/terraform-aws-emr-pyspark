@@ -32,11 +32,11 @@ resource "aws_emr_cluster" "cluster" {
 
   # Master instance type
   master_instance_group {
-    instance_type = "m5.4xlarge"
+    instance_type = "m5.xlarge"
   }
 
   core_instance_group {
-    instance_type  = "m5.2xlarge"
+    instance_type  = "m5.xlarge"
     instance_count = 2
   }
 
