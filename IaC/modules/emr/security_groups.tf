@@ -3,7 +3,7 @@
 # Main node security group
 resource "aws_security_group" "main_security_group" {
 
-  name        = "emr-main-security-group"
+  name        = "emr-main-sg"
   description = "Allow inbound traffic for EMR main node."
 
   revoke_rules_on_delete = true
@@ -28,7 +28,7 @@ resource "aws_security_group" "main_security_group" {
 # Core node security group
 resource "aws_security_group" "core_security_group" {
 
-  name        = "emr-core-security-group"
+  name        = "emr-core-sg"
   description = "Allow inbound and outbound traffic for EMR core nodes."
 
   revoke_rules_on_delete = true
