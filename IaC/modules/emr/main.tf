@@ -85,7 +85,7 @@ resource "aws_emr_cluster" "cluster" {
       hadoop_jar_step = [
         {
           jar        = "command-runner.jar"
-          args       = ["spark-submit", "/home/hadoop/pipeline/terraform_aws_emr_pyspark.py"]
+          args       = ["bash", "-c", "export S3_BUCKET_NAME=${var.bucket_name} && spark-submit /home/hadoop/pipeline/terraform_aws_emr_pyspark.py"]
           main_class = ""
           properties = {}
         }
