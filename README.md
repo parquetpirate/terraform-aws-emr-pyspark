@@ -35,7 +35,8 @@ graph TD
 
 | Component | Resource | Purpose |
 |-----------|----------|---------|
-| **S3** | Bucket `terraform-aws-emr-pyspark-<account-id>` | Stores pipeline scripts, dataset, bootstrap scripts, logs, and ML model output |
+| **S3** | Bucket `terraform-aws-emr-pyspark-data-<account-id>` | Stores pipeline scripts, dataset, bootstrap scripts, logs, and ML model output |
+| **S3** | Bucket `terraform-aws-emr-pyspark-<account-id>` | Stores Terraform remote state (`.tfstate`) — managed manually |
 | **IAM** | EMR service role | Allows EMR to call AWS services on your behalf |
 | **IAM** | EC2 instance profile | Grants EC2 instances in the cluster access to S3 |
 | **EMR** | Cluster `emr-7.13.0` | Managed Spark cluster with 1 master (`m5.4xlarge`) + 2 core nodes (`m5.2xlarge`) |
@@ -187,9 +188,16 @@ git clone <repository-url>
 cd terraform-aws-emr-pyspark/IaC
 ```
 
-### 2. Create the S3 backend bucket (manual step)
+### 2. Create the S3 state backend bucket (manual step)
 
-The Terraform remote state backend requires a pre-existing S3 bucket. Create it before running `terraform init`:
+This project uses a **two-bucket architecture**:
+
+| Bucket | Purpose | Managed by |
+|--------|---------|------------|
+| `terraform-aws-emr-pyspark-<account-id>` | Terraform remote state (`.tfstate`) | Manual — created once, never destroyed |
+| `terraform-aws-emr-pyspark-data-<account-id>` | Pipeline scripts, dataset, logs, ML output | Terraform — created and destroyed automatically |
+
+Create the state backend bucket before running `terraform init`:
 
 ```bash
 aws s3api create-bucket \
@@ -205,7 +213,7 @@ Replace `<your-aws-account-id>` with your 12-digit AWS account ID.
 Edit `terraform.tfvars` with your values:
 
 ```hcl
-bucket_name        = "terraform-aws-emr-pyspark-<your-aws-account-id>"
+bucket_name        = "terraform-aws-emr-pyspark-data-<your-aws-account-id>"
 emr_cluster_name   = "distributed-pyspark-training-<your-aws-account-id>"
 bucket_versioning  = "Enabled"
 pipeline_directory = "./pipeline"
@@ -213,16 +221,12 @@ data_directory     = "./data"
 scripts_directory  = "./scripts"
 ```
 
-Also update the backend bucket name in `config.tf` line 18 to match your bucket.
+Also update the backend bucket name in `config.tf` line 18 to match your state bucket (created in step 2).
 
-### 4. Import the S3 bucket and apply
+### 4. Initialize and apply
 
 ```bash
 terraform init
-
-# Import the bucket you created in step 2 into Terraform state
-terraform import module.s3.aws_s3_bucket.this terraform-aws-emr-pyspark-<your-aws-account-id>
-
 terraform plan
 terraform apply
 ```
@@ -251,10 +255,6 @@ aws configure
 # Run Terraform
 cd /iac
 terraform init
-
-# Import the bucket you created manually into Terraform state
-terraform import module.s3.aws_s3_bucket.this terraform-aws-emr-pyspark-<your-aws-account-id>
-
 terraform plan
 terraform apply
 ```
