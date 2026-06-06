@@ -104,6 +104,13 @@ resource "aws_emr_cluster" "cluster" {
         "spark.network.timeout": "800s",
         "spark.executor.heartbeatInterval": "60s"
         }
+    },
+    {
+      "Classification": "spark-env",
+        "Properties": {
+        "spark.executorEnv.S3_BUCKET_NAME": "${var.bucket_name}",
+        "spark.yarn.appMasterEnv.S3_BUCKET_NAME": "${var.bucket_name}"
+        }
     }
   ]
   EOF

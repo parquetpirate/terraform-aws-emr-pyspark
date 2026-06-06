@@ -23,4 +23,6 @@ module "emr" {
   bucket_name      = var.bucket_name
   instance_profile = module.iam.instance_profile
   service_role     = module.iam.service_role
+
+  depends_on = [module.s3]
 }

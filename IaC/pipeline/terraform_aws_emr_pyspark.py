@@ -3,7 +3,6 @@
 import os
 import boto3
 import traceback
-import pyspark
 from pyspark.sql import SparkSession
 from log import write_log
 from processing import clean_transform_data
@@ -13,7 +12,6 @@ from ml import train_ml_models
 BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "")
 
 # AWS credentials are picked up from the EMR instance profile automatically
-# No need to hardcode keys — the SDK uses the instance profile credential chain
 
 print("\nLog - Initializing processing.")
 
@@ -34,7 +32,7 @@ try:
 except Exception:
     write_log("Log - Spark initialization failed.", bucket)
     write_log(traceback.format_exc(), bucket)
-    raise Exception(traceback.format_exc())
+    raise
 
 # Write log
 write_log("Log - Spark initialized.", bucket)
@@ -51,7 +49,7 @@ except Exception:
     write_log("Log - Data cleaning and transformation failed.", bucket)
     write_log(traceback.format_exc(), bucket)
     spark.stop()
-    raise Exception(traceback.format_exc())
+    raise
 
 # Machine learning model training block
 try:
@@ -68,7 +66,7 @@ except Exception:
     write_log("Log - ML model training failed.", bucket)
     write_log(traceback.format_exc(), bucket)
     spark.stop()
-    raise Exception(traceback.format_exc())
+    raise
 
 # Write log
 write_log("Log - Models created and saved to S3.", bucket)

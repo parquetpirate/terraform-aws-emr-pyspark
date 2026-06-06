@@ -1,17 +1,15 @@
 # Data cleaning and feature engineering for EMR PySpark pipeline
 
-import os
-import os.path
-import numpy
-from pyspark.ml.feature import *
-from pyspark.sql import functions
-from pyspark.sql.functions import *
-from pyspark.sql.types import StringType, IntegerType
-from pyspark.ml.classification import *
-from pyspark.ml.evaluation import *
-from pyspark.ml.evaluation import MulticlassClassificationEvaluator
-from pyspark.ml.feature import StopWordsRemover
-from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+from pyspark.ml.feature import (
+    HashingTF,
+    IDF,
+    MinMaxScaler,
+    RegexTokenizer,
+    StopWordsRemover,
+    StringIndexer,
+    Word2Vec,
+)
+from pyspark.sql.functions import col, lower, regexp_replace
 from log import write_log
 from upload_s3 import upload_processed_data
 
@@ -76,15 +74,13 @@ def clean_transform_data(spark, bucket, bucket_name, is_emr):
     write_log("Log - Checking class balance.", bucket)
 
     # Count positive and negative reviews
-    count_positive_sentiment = reviews.where(reviews["sentiment"] == "positive").count()
-    count_negative_sentiment = reviews.where(reviews["sentiment"] == "negative").count()
+    counts = reviews.groupBy("sentiment").count().collect()
+    count_map = {row["sentiment"]: row["count"] for row in counts}
+    count_positive = count_map.get("positive", 0)
+    count_negative = count_map.get("negative", 0)
 
     write_log(
-        "Log - There are "
-        + str(count_positive_sentiment)
-        + " positive reviews and "
-        + str(count_negative_sentiment)
-        + " negative reviews.",
+        f"Log - There are {count_positive} positive reviews and {count_negative} negative reviews.",
         bucket,
     )
 
@@ -165,27 +161,26 @@ def clean_transform_data(spark, bucket, bucket_name, is_emr):
     write_log("Log - Saving cleaned and transformed data.", bucket)
 
     # Upload processed data to S3
-    path = f"s3://{bucket_name}/data/" if is_emr else "data/"
-    s3_path = "data/"
+    s3_prefix = "data/"
 
     upload_processed_data(
         HTFfeaturizedData,
         path + "HTFfeaturizedData",
-        s3_path + "HTFfeaturizedData",
+        s3_prefix + "HTFfeaturizedData",
         bucket,
         is_emr,
     )
     upload_processed_data(
         TFIDFfeaturizedData,
         path + "TFIDFfeaturizedData",
-        s3_path + "TFIDFfeaturizedData",
+        s3_prefix + "TFIDFfeaturizedData",
         bucket,
         is_emr,
     )
     upload_processed_data(
         W2VfeaturizedData,
         path + "W2VfeaturizedData",
-        s3_path + "W2VfeaturizedData",
+        s3_prefix + "W2VfeaturizedData",
         bucket,
         is_emr,
     )

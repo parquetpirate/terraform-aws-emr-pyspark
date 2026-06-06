@@ -1,8 +1,8 @@
 # Infrastructure as Code for Distributed PySpark Training on Amazon EMR
 # S3 Work Folders
 
-# python_scipts
-resource "aws_s3_object" "python_scipts" {
+# python_scripts
+resource "aws_s3_object" "python_scripts" {
   for_each = fileset("${var.pipeline_directory}/", "**")
   bucket   = var.bucket_name
   key      = "pipeline/${each.value}"
@@ -19,7 +19,7 @@ resource "aws_s3_object" "raw_data" {
   etag     = filemd5("${var.data_directory}/${each.value}")
 }
 
-# tansformed_data
+# transformed_data
 resource "aws_s3_object" "transformed_data" {
   bucket = var.bucket_name
   key    = "data/"
@@ -43,4 +43,5 @@ resource "aws_s3_object" "bash_scripts" {
   bucket   = var.bucket_name
   key      = "scripts/${each.value}"
   source   = "${var.scripts_directory}/${each.value}"
+  etag     = filemd5("${var.scripts_directory}/${each.value}")
 }

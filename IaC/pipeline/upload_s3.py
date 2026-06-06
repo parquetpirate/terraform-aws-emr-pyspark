@@ -12,7 +12,7 @@ def upload_processed_data(df, path, s3_path, bucket, is_emr):
 
     if is_emr:
         if len(list(bucket.objects.filter(Prefix=(s3_path)).limit(1))) > 0:
-            df.write.mode("Overwrite").partitionBy("label").parquet(path)
+            df.write.mode("overwrite").partitionBy("label").parquet(path)
         else:
             df.write.partitionBy("label").parquet(path)
     else:
