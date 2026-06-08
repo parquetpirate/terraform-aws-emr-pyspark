@@ -1,4 +1,4 @@
-# Infrastructure as Code for Distributed PySpark Training on Amazon EMR
+# IaC for Distributed PySpark Training on Amazon EMR
 # Variable Definitions
 
 variable "bucket_name" {
