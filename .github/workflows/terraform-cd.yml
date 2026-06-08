@@ -1,0 +1,56 @@
+name: Terraform CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "yes" to confirm deployment'
+        required: true
+        default: 'no'
+
+env:
+  AWS_REGION: us-east-2
+  ROLE_ARN: arn:aws:iam::463032375612:role/github-actions-terraform-role
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'yes'
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build Docker image
+        run: docker build -t terraform-aws-emr-pyspark .
+
+      - name: Terraform Init
+        run: >
+          docker run --rm
+          -v $PWD/IaC:/iac
+          -e AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }}
+          -e AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }}
+          -e AWS_SESSION_TOKEN=${{ env.AWS_SESSION_TOKEN }}
+          -e AWS_DEFAULT_REGION=${{ env.AWS_REGION }}
+          terraform-aws-emr-pyspark
+          bash -c "cd /iac && terraform init"
+
+      - name: Terraform Apply
+        run: >
+          docker run --rm
+          -v $PWD/IaC:/iac
+          -e AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }}
+          -e AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }}
+          -e AWS_SESSION_TOKEN=${{ env.AWS_SESSION_TOKEN }}
+          -e AWS_DEFAULT_REGION=${{ env.AWS_REGION }}
+          terraform-aws-emr-pyspark
+          bash -c "cd /iac && terraform apply -auto-approve"
