@@ -1,5 +1,3 @@
-# Terradorm - CI
-
 name: Terraform CI
 
 on:
@@ -67,6 +65,9 @@ jobs:
           -e AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }}
           -e AWS_SESSION_TOKEN=${{ env.AWS_SESSION_TOKEN }}
           -e AWS_DEFAULT_REGION=${{ env.AWS_REGION }}
+          -e TF_VAR_bucket_name=${{ vars.BUCKET_NAME }}
+          -e TF_VAR_emr_cluster_name=${{ vars.EMR_CLUSTER_NAME }}
+          -e TF_VAR_bucket_versioning=${{ vars.BUCKET_VERSIONING }}
           terraform-aws-emr-pyspark
           bash -c "cd /iac && terraform plan -no-color" > plan_output.txt
 
