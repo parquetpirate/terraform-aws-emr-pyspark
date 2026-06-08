@@ -1,11 +1,11 @@
 # Infrastructure as Code for Distributed PySpark Training on Amazon EMR
-# Environment Configuration — Example File
-# 
-# Copy this file to terraform.tfvars and fill in your values:
-#   cp terraform.tfvars.example terraform.tfvars
+# Environment Configuration — Example
+#
+# Copy this file to terraform.tfvars and replace placeholders with your values.
+# terraform.tfvars is gitignored and never committed.
 
-bucket_name        = "your-bucket-name"
-emr_cluster_name   = "your-emr-cluster-name"
+bucket_name        = "terraform-aws-emr-pyspark-data-<YOUR_AWS_ACCOUNT_ID>"
+emr_cluster_name   = "distributed-pyspark-training-<YOUR_AWS_ACCOUNT_ID>"
 bucket_versioning  = "Enabled"
 pipeline_directory = "./pipeline"
 data_directory     = "./data"
